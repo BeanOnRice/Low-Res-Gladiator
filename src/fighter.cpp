@@ -7,8 +7,9 @@ Description: //FIXME
 
 #include "fighter.h"
 
-Fighter::Fighter(int hp, int atk, int def, int moves)
+Fighter::Fighter(bool pc, int hp, int atk, int def, int moves)
 {
+	this->stats.isPlayer = pc;
 	this->stats.hp = hp;
 	this->stats.atk = atk;
 	this->stats.def = def;

@@ -10,6 +10,7 @@ Description: //FIXME
 
 struct Fighter_stats
 {
+	bool isPlayer = false;
 	int hp = 3;   // 0 means death
 	int atk = 1;  // means base damage dealt
 	int def = 1;  // means damage blocked
@@ -34,7 +35,7 @@ struct Move_stats
 class Fighter
 {
 public:
-	Fighter(int hp = 3, int atk = 1, int def = 1, int moves = 3);
+	Fighter(bool pc = false, int hp = 3, int atk = 1, int def = 1, int moves = 3);
 	void use_move(int choice = -1);
 private:
 	Fighter_stats stats;

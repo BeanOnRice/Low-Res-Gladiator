@@ -6,14 +6,23 @@ Description: High level overview of Low Res Gladiator game
 */
 
 #include <iostream>
+#include "combat.h"
 
 enum mode { HOME, BATTLE, HSCORE, QUIT };
+
 
 void _mainMenu(void);  //FIXME: needs looks touch up  // display
 mode mainMenu(void);  //FIXME: needs looks touch up
 
+void _battle(combat *cur_combat);  //FIXME: needs looks touch up  // display
+mode _gameOver(void)
+mode battle(/* pointer to hs file */);  //FIXME: needs implementation finished
+
+mode highScore(/*pointer to high score file*/);
+
 int main(int argc, char **argv)
 {
+	//FIXME: open high score file
 	mode cur_mode = HOME;
 	while (true)
 	{
@@ -75,7 +84,72 @@ mode mainMenu(void)
 void _mainMenu(void)
 {
 	std::cout << "\033[2J\033[1;1H";
-	//TITLE
+	//FIXME:TITLE
 	std::cout << "START\nHIGH SCORE\nQUIT\n" << std::endl;
 	return;
+}
+
+
+mode battle(/* pointer to hs file */)
+{
+	//FIXME:open file to save score to
+	combat cur_combat();
+	while (!cur_combat.defeat())
+	{
+		roundStart();
+		roundEnd();
+		if (cur_combat.victory())
+		{
+			//FIXME:levelUp player
+			//FIXME:heal player
+			if (((cur_combat.getRound() % 3) == 0) && (cur_combat.getRound != 0) && ((cur_combat.getRound & 10) != 0))
+			{
+				//FIXME:add random enemy using round + 1
+			}
+			else if (/*specific round*/)
+			{
+				//FIXME: add boss enemy
+			}
+			else
+			{
+				//FIXME:add random enemy using round
+			}
+			cur_combat.increaseScore();
+		}
+	}
+	//FIXME: add score to highscore list where it needs to go
+	return _gameOver();
+}
+
+void _battle(combat *cur_combat)
+{
+	//display
+	return;
+}
+
+mode _gameOver(void)
+{
+	int selection;
+	//FIXME: display game over screen
+	//FIXME: take player input
+	switch (selection)
+	{
+		case 1:
+			return BATTLE;
+		case 2:
+			return HSCORE;
+		case 3:
+			return HOME;
+		default:
+			return HOME;  // in case something went wrong
+	}
+}
+
+
+mode highScore(/*pointer to high score file*/)
+{
+	int selection;
+	//FIXME: display top 10 high scores
+	//FIXME: take player input // just press anything to return home
+	return HOME;
 }
