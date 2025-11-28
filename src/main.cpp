@@ -7,71 +7,57 @@ Description: High level overview of Low Res Gladiator game
 
 #include <iostream>
 
-enum mode { HOME, BATTLE, HSCORE, QUIT }
+enum mode { HOME, BATTLE, HSCORE, QUIT };
 
-void _mainMenu();  //FIXME: needs looks touch up  // display
-mode mainMenu();  //FIXME: needs looks touch up
+void _mainMenu(void);  //FIXME: needs looks touch up  // display
+mode mainMenu(void);  //FIXME: needs looks touch up
 
 int main(int argc, char **argv)
 {
 	mode cur_mode = HOME;
 	while (true)
 	{
-		switch (mode)
+		int trash;
+		switch (cur_mode)
 		{
 			case HOME:
-				{
-					//FIXME: main menu
-					break;
-				}
+				cur_mode = mainMenu();
+				break;
 			case BATTLE:
-				{
-					std::cout << "BATTLE\n"; //FIXME
-					break;
-				}
+				std::cout << "BATTLE\n"; //FIXME
+				break;
 			case HSCORE:
-				{
-					std::cout << "HSCORE\n"; //FIXME
-					break;
-				}
+				std::cout << "HSCORE\n"; //FIXME
+				break;
 			case QUIT:
-				{
-					//FIXME
-					std::cout << "\033[2J\033[1;1H" << "Thanks for playing!" << std::endl;
-					return 0;
-				}
-			case default:
-				{
-					std::cout << "Catastrophic error in main.cpp\nQuitting...\n";
-					return 1;
-				}
-			cur_mode = HOME;  //FIXME: REMOVE when functions done
+				//FIXME
+				std::cout << "\033[2J\033[1;1H" << "Thanks for playing!\n" << std::endl;
+				return 0;
+			default:
+				std::cout << "Catastrophic error in main.cpp\nQuitting...\n";
+				return 1;
 		}
+	}
 
 	return 0;
 }
 
 
-mode mainMenu()
+mode mainMenu(void)
 {
 	int selection;
-	bool usage_displayed = false;
-	string garbage;
+	std::string garbage;
 
 	_mainMenu();
-	std::cout << "Selection: ";
+	std::cout << "\nSelection: ";
 
 	while (!(std::cin >> selection) || (selection < 1) || (selection > 3))
 	{
 		std::cin.clear();
 		getline(std::cin, garbage);
-		if (usage_displayed == false)
-		{
-			_mainMenu();
-			std::cout << "usage: int between 1 and 3 (inclusive)\n";
-			std::cout << "Selection: ";
-			usage_displayed == true;
-		}
+		_mainMenu();
+		std::cout << "usage: int between 1 and 3 (inclusive)\n";
+		std::cout << "Selection: ";
 	}
 	switch (selection)
 	{
@@ -81,12 +67,12 @@ mode mainMenu()
 			return HSCORE;
 		case 3:  // QUIT corresponds to QUIT
 			return QUIT;
-		case default:
+		default:
 			return HOME;  // This shouldn't be able to happen
 	}
 }
 
-void _mainMenu()
+void _mainMenu(void)
 {
 	std::cout << "\033[2J\033[1;1H";
 	//TITLE
