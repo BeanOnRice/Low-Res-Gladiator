@@ -39,7 +39,6 @@ int main(int argc, char **argv)
 	mode cur_mode = HOME;
 	while (true)
 	{
-		int trash;
 		switch (cur_mode)
 		{
 			case HOME:

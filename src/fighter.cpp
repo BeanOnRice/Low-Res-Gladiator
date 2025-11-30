@@ -7,7 +7,7 @@ Description: Class for neatly holding the core stats and abilities of a fighter.
 
 #include "fighter.h"
 
-fighter::fighter(int hp, int atk, int def, int moves, bool pc)
+fighter::fighter(int hp, int atk, int def, int moves_count, bool pc)
 {
 	this->stats.hp = hp;
 	this->stats.atk = atk;
@@ -16,8 +16,8 @@ fighter::fighter(int hp, int atk, int def, int moves, bool pc)
 	this->chosen_move = 0;
 
 	this->moves_stocked = 0;
-	this->moves_size = moves;
-	moves = new move_stats[moves_size];
+	this->moves_size = moves_count;
+	this->moves = new move_stats[moves_size];
 }
 
 fighter::~fighter()
@@ -25,7 +25,7 @@ fighter::~fighter()
 	delete[] this->moves;
 }
 
-void fighter::addNewMove(std::string name = "Basic attack", effect_type effect = ATK, int pwr = 1)
+void fighter::addNewMove(std::string name, effect_type effect, int pwr)
 {
 	move_stats new_move;
 	new_move.name = name;
@@ -35,7 +35,7 @@ void fighter::addNewMove(std::string name = "Basic attack", effect_type effect =
 	if (this->moves_stocked >= this->moves_size)
 	{
 		this->moves_size *= 2;
-		moves_stats *tmp = new move_stats[moves_size];
+		move_stats *tmp = new move_stats[moves_size];
 		for (int i = 0; i < this->moves_stocked; i++)
 		{
 			tmp[i] = this->moves[i];
@@ -97,7 +97,7 @@ void fighter::addRandMove(int pwr_cap)
 	return;
 }
 
-void fighter::ChooseMove(int choice)
+void fighter::chooseMove(int choice)
 {
 	this->turn_used = false;
 	if (choice >= this->moves_stocked)
@@ -117,7 +117,7 @@ void fighter::ChooseMove(int choice)
 	return;
 }
 
-void fighter::useMove(fighter *target = nullptr)
+void fighter::useMove(fighter *target)
 {
 	if (this->turn_used == false)
 	{
