@@ -2,13 +2,13 @@
 File: fighter.h
 Author: Jesus Treto Jr.
 Date: 11/28/25
-Description: //FIXME
+Description: Class for neatly holding the core stats and abilities of a fighter. Also allowing for easy checking and changing of these stats.
 */
 
 #pragma once
 #include <vector>
 
-struct Fighter_stats
+struct fighter_stats
 {
 	bool isPlayer = false;
 	int hp = 3;   // 0 means death
@@ -22,22 +22,50 @@ struct Fighter_stats
 	int poisoned = 0;  // remove this much hp and lower by 1 (down to 0)
 }
 
-enum Move_type { TACTIC, ATTACK, MAGIC };
-enum Effect_type { ATK, BLK, PSN };
+//FIXME: NEW prio just player first, then enemy
+enum effect_type { ATK, BLK, PSN };
 
-struct Move_stats
+struct move_stats
 {
-	string name = "placeholder";
-	Effect_type effect = ATK;
-	int pwr = 1;  // this + base_stat = effect strength
+	std::string name = "placeholder";
+	effect_type effect = ATK;
+	int pwr = 1;  // this + fighter base_stat = effect strength
 }
 
-class Fighter
+class fighter
 {
 public:
-	Fighter(bool pc = false, int hp = 3, int atk = 1, int def = 1, int moves = 3);
-	void use_move(int choice = -1);
+	// Initializing
+	fighter(int hp = 3, int atk = 1, int def = 1, int moves = 3, bool pc = false);  //FIXME: make .cpp match
+	void addNewMove(std::string name = "Basic attack", effect_type effect = ATK, int pwr = 1);
+	void addRandomNewMove(void);  // for giving enemy random moves
+
+	// Moves
+	void ChooseRandMove(void);  // selects random move  //FIXME: NEW
+	void useMove(void);  // uses selected move  //FIXME: NEW
+	std::string getMoveName(void) { return this->moves[chosen_move].name; };
+	effect_type getMoveEffect(void) { return this->moves[chosen_move].effect; };
+	int getMovePwr(void) { return this->moves[chosen_move].pwr; };
+	int getMovesAmount(void) { return this->moves.size(); };
+
+	// Core stats
+	bool player(void) { return this->stats.isPlayer; };
+	void setHP(int hp) { this->stats.hp = hp; };
+	int getHP(void) { return this->stats.hp; };
+	void setATK(int atk) { this->stats.atk = atk; };
+	int getATK(void) { return this->stats.atk; };
+	void setDEF(int def) { this->stats.def = def; };
+	int getDEF(void) { return this->stats.def; };
+	void setMAG(int mag) { this->stats.mag = mag; };
+	int getMAG(void) { return this->stats.mag; };
+	// Status effects
+	void setBlocking(int block) { this->stats.blocking = block; };
+	int getBlocking(void) { return this->stats.blocking; };
+	void setPoisoned(int pois) { this->stats.poisoned = pois; };
+	int getPoisoned(void) { return this->stats.poisoned; };
+
 private:
-	Fighter_stats stats;
+	fighter_stats stats;
 	std::vector<Move_stats> moves;
+	int chosen_move;  //FIXME: NEW
 }

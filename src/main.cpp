@@ -8,7 +8,7 @@ Description: Provides interface for user of Low Res Gladiator game
 
 #include <iostream>
 #include <fstream>
-//#include "combat.h"//FIXME
+#include "fighter.h"
 #include <time.h>
 #include <string>
 
