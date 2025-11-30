@@ -16,7 +16,14 @@ fighter::fighter(int hp, int atk, int def, int moves_count, bool pc)
 	this->chosen_move = 0;
 
 	this->moves_stocked = 0;
-	this->moves_size = moves_count;
+	if (moves_count <= 0)
+	{
+		this->moves_size = 1;
+	}
+	else
+	{
+		this->moves_size = moves_count;
+	}
 	this->moves = new move_stats[moves_size];
 }
 
@@ -25,11 +32,27 @@ fighter::~fighter()
 	delete[] this->moves;
 }
 
-void fighter::addNewMove(std::string name, effect_type effect, int pwr)
+void fighter::addNewMove(const std::string name, const std::string effect, int pwr)
 {
 	move_stats new_move;
 	new_move.name = name;
-	new_move.effect = effect;
+	if (effect.compare("ATK") == 0)
+	{
+		new_move.effect = ATK;
+	}
+	else if (effect.compare("BLK"))
+	{
+		new_move.effect = BLK;
+	}
+	else if (effect.compare("PSN"))
+	{
+		new_move.effect = PSN;
+	}
+	else
+	{
+		new_move.effect = ATK;
+	}
+
 	new_move.pwr = pwr;
 
 	if (this->moves_stocked >= this->moves_size)
@@ -43,6 +66,8 @@ void fighter::addNewMove(std::string name, effect_type effect, int pwr)
 		delete[] this->moves;
 		this->moves = tmp;
 	}
+	this->moves[moves_stocked] = new_move;
+	moves_stocked++;
 
 	return;
 }
@@ -72,23 +97,23 @@ void fighter::addRandMove(int pwr_cap)
 	}
 
 	rand_result = rand() % 4;
-	effect_type effect;
+	std::string effect;
 	switch (rand_result)
 	{
 		case 0:
-			effect = ATK;
+			effect = "ATK";
 			name = name + " ATTACK";
 			break;
 		case 1:
-			effect = BLK;
+			effect = "BLK";
 			name = name + " BLOCK";
 			break;
 		case 2:
-			effect = PSN;
+			effect = "PSN";
 			name = name + " POISON";
 			break;
 		default:
-			effect = ATK;
+			effect = "ATK";
 			name = name + " ATTACKE";
 			break;
 	}
@@ -139,7 +164,7 @@ void fighter::useMove(fighter *target)
 	return;
 }
 
-std::string fighter::getMoveName(int choice)
+std::string fighter::getMoveName(int choice) const
 {
 	if ((choice < 0) || (choice >= this->moves_stocked))
 	{
@@ -152,7 +177,7 @@ std::string fighter::getMoveName(int choice)
 	return this->moves[choice].name;
 }
 
-int fighter::getMoveStrength(int choice)
+int fighter::getMoveStrength(int choice) const
 {
 	int nomination;
 	if ((choice < 0) || (choice >= this->moves_stocked))

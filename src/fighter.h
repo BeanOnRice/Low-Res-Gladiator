@@ -14,17 +14,17 @@ class fighter
 {
 public:
 	// Initializing
-	fighter(int hp = 3, int atk = 1, int def = 1, int moves_count = 3, bool pc = false);
+	explicit fighter(int hp = 3, int atk = 1, int def = 1, int moves_count = 3, bool pc = false);
 	~fighter();
-	void addNewMove(std::string name = "Basic Attack", effect_type effect = ATK, int pwr = 1);
+	void addNewMove(const std::string name = "Basic Attack", const std::string effect = "ATK", int pwr = 1);
 	void addRandMove(int pwr_cap = 2);
 
 	// Moves
-	int getMoveCount(void) { return this->moves_stocked; };
+	int getMoveCount(void) const { return this->moves_stocked; };
 	void chooseMove(int choice = -1);  // chooses random by default
 	void useMove(fighter *target = nullptr);
-	std::string getMoveName(int choice = -1);  // no param gives move chosen by npc
-	int getMoveStrength(int choice = -1);  // no param gives move chosen by npc
+	std::string getMoveName(int choice = -1) const;  // no param gives move chosen by npc
+	int getMoveStrength(int choice = -1) const;  // no param gives move chosen by npc
 
 	// Stat changers
 	void changeHP(int change) { this->stats.hp += change; };
@@ -34,19 +34,19 @@ public:
 	void changePoisoned(int change) { this->stats.poisoned += change; };
 
 	// Core stats
-	bool isPlayer(void) { return this->stats.is_player; };
+	bool isPlayer(void) const { return this->stats.is_player; };
 	void setHP(int hp) { this->stats.hp = hp; };
-	int getHP(void) { return this->stats.hp; };
+	int getHP(void) const { return this->stats.hp; };
 	void setATK(int atk) { this->stats.atk = atk; };
-	int getATK(void) { return this->stats.atk; };
+	int getATK(void) const { return this->stats.atk; };
 	void setDEF(int def) { this->stats.def = def; };
-	int getDEF(void) { return this->stats.def; };
+	int getDEF(void) const { return this->stats.def; };
 	// Status effects
 	void processStatusEffects(void);
 	void setBlocking(int block) { this->stats.blocking = block; };
-	int getBlocking(void) { return this->stats.blocking; };
+	int getBlocking(void) const { return this->stats.blocking; };
 	void setPoisoned(int pois) { this->stats.poisoned = pois; };
-	int getPoisoned(void) { return this->stats.poisoned; };
+	int getPoisoned(void) const { return this->stats.poisoned; };
 
 private:
 	struct move_stats
@@ -67,10 +67,10 @@ private:
 		int poisoned = 0;  // remove this much hp
 	};
 
-		fighter_stats stats;
-		move_stats *moves = nullptr;
-		int moves_stocked = 0;
-		int moves_size = 0;
-		int chosen_move = 0;
-		bool turn_used = false;
+	fighter_stats stats;
+	move_stats *moves = nullptr;
+	int moves_stocked = 0;
+	int moves_size = 0;
+	int chosen_move = 0;
+	bool turn_used = false;
 	};

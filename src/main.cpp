@@ -16,7 +16,7 @@ Description: Provides interface for user of Low Res Gladiator game
 #define DEF_TERM_ROW 24
 #define DEF_TERM_COL 80
 
-void centerPrint(std::string str, int offset = 0);
+void centerPrint(const std::string str, const int offset = 0);
 
 enum mode { HOME, BATTLE, HSCORE, QUIT };
 
@@ -26,7 +26,7 @@ mode mainMenu(void);
 
 mode _gameOver(void);
 void _gameOverDisplay(void);  //FIXME: needs looks touch up
-void _battleDisplay(fighter *player, fighter *enemy, bool print_usage = false);
+void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usage = false);
 mode battle(const std::string *hs_file_name);
 
 void _highScoreDisplayTopTen(const std::string *hs_file_name);  //FIXME: needs looks touch up
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 				cur_mode = highScore(&hs_file_name);
 				break;
 			case QUIT:
-				std::cout << "\033[2J\033[1;1H" << "Thanks for playing!\n" << std::endl;
+				std::cout << "\033[2J\033[1;1H" << "\n" << std::endl << "Thanks for playing!\n" << std::endl;
 				return 0;
 			default:
 				std::cout << "Catastrophic error in main.cpp\nQuitting...\n";
@@ -110,11 +110,12 @@ void _mainMenuDisplay(void)
 	title[7] = "| |_| | |___ / ___ \\| |_| | | / ___ \\| || |_| |  _ <";
 	title[8] = " \\____|_____/_/   \\_\\____/___/_/   \\_\\_| \\___/|_| \\_\\";
 	std::cout << std::endl;
-	centerPrint(title[0], -2);
-	centerPrint(title[1], -2);
-	centerPrint(title[2], -1);
-	centerPrint(title[3], -1);
-	for (int i = 4; i < 9; i++)
+	centerPrint(title[0], -3);
+	centerPrint(title[1], -3);
+	centerPrint(title[2], -2);
+	centerPrint(title[3], -2);
+	centerPrint(title[4], -1);
+	for (int i = 5; i < 9; i++)
 	{
 		centerPrint(title[i]);
 	}
@@ -135,10 +136,10 @@ mode battle(const std::string *hs_file_name)
 	std::string garbage;
 	int selection;
 
-	fighter player(5, 2, 3, true);
-	player.addNewMove("ATTACK", ATK, 1);
-	player.addNewMove("BLOCK", BLK, 1);
-	player.addNewMove("POISON", PSN, 2);
+	fighter *player = new fighter(5, 2, 3, 3, true);
+	player->addNewMove("ATTACK", "ATK", 1);
+	player->addNewMove("BLOCK", "BLK", 1);
+	player->addNewMove("POISON", "PSN", 2);
 
 	fighter *enemy = new fighter();
 	for (int i = 0; i < 3; i++)
@@ -149,34 +150,34 @@ mode battle(const std::string *hs_file_name)
 	int round = 1;
 	int score = 0;
 
-	while (player.getHP() > 0)
+	while (player->getHP() > 0)
 	{
 		enemy->chooseMove();
-		_battleDisplay(&player, enemy);
-		while (!(std::cin >> selection) || (selection < 0) || (selection >= player.getMoveCount()))
+		_battleDisplay(player, enemy);
+		while (!(std::cin >> selection) || (selection < 0) || (selection >= player->getMoveCount()))
 		{
 			std::cin.clear();
 			getline(std::cin, garbage);
-			_battleDisplay(&player,enemy, true);
+			_battleDisplay(player,enemy, true);
 		}
 		getline(std::cin, garbage);
-		player.chooseMove(selection);
+		player->chooseMove(selection);
 
 		if (enemy->getHP() > 0)
 		{
-			enemy->useMove(&player);
+			enemy->useMove(player);
 			enemy->processStatusEffects();
 		}
-		player.processStatusEffects();
+		player->processStatusEffects();
 		if (enemy->getHP() <= 0)
 		{
 			delete enemy;
 			score += round * round;
 			// player level up
-			player.changeHP(2);
-			player.changeHP(rand() % 2);
-			player.changeATK(rand() % 2);
-			player.changeDEF(rand() % 2);
+			player->changeHP(2);
+			player->changeHP(rand() % 2);
+			player->changeATK(rand() % 2);
+			player->changeDEF(rand() % 2);
 
 			enemy = new fighter((rand() % round) + 3, (rand() % round) + 1, (rand() % round + 1));
 			for (int i = 0; i < 3; i++)
@@ -185,28 +186,30 @@ mode battle(const std::string *hs_file_name)
 			}
 		}
 	}
+	delete player;
+	delete enemy;
 	//FIXME: add score into highscore list
 	//FIXME: sort highscore list as well
 	//FIXME: highscore list CANT go over 10 entries
 	return _gameOver();
 }
 
-void _battleDisplay(fighter *player, fighter *enemy, bool print_usage)
+void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usage)
 {
 	std::string tmp;
 	std::cout << "\033[2J\033[1;1H";
 	std::string line[DEF_TERM_ROW];
 	std::string art[10];
 	art[0] = "                              ,.-----._";
-	art[1] = "  .                          /         \\,";
+	art[1] = "   .                         /         \\,";
 	art[2] = " / \\    ,^.                Y_____        \\";
 	art[3] = "/   `----\\|--'\\           .'     \\       '\"";
 	art[4] = "|        ||    `>          l      \\     _l";
 	art[5] = "|      __||__ /'           .|     |    ||`";
 	art[6] = " \\  .-' | |  `              l     |   _.'";
 	art[7] = "  \\/    | |                 l     |   j";
-	art[8] = "         | |                _ \\_______/     _";
-	art[9] = "         | |               / `--|    |__.--' |";
+	art[8] = "          | |               _ \\_______/     _";
+	art[9] = "           | |             / `--|    |__.--' |";
 	centerPrint(art[0], -3);
 	centerPrint(art[1], -2);
 	for (int i = 2; i < 7; i++)
@@ -351,6 +354,7 @@ mode _gameOver(void)
 void _gameOverDisplay(void)
 {	
 	std::cout << "\033[2J\033[1;1H";
+	std::cout << "\n" << std::endl;
 	centerPrint("GAME");
 	centerPrint("OVER");
 	std::cout << "\n";
@@ -393,7 +397,7 @@ void _highScoreDisplayTopTen(const std::string *hs_file_name)
 }
 
 
-void centerPrint(std::string str, int offset)
+void centerPrint(const std::string str, const int offset)
 {
 	if (str.length() >= DEF_TERM_COL)
 	{
