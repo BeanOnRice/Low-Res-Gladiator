@@ -16,7 +16,7 @@ Description: Provides interface for user of Low Res Gladiator game
 #define DEF_TERM_ROW 24
 #define DEF_TERM_COL 80
 
-void centerPrint(const std::string str, const int offset = 0);
+void centerPrint(const std::string str, const int offset = 0, const int spaces_used = 0);
 
 enum mode { HOME, BATTLE, HSCORE, QUIT };
 
@@ -53,9 +53,11 @@ int main(int argc, char **argv)
 			case QUIT:
 				std::cout << "\033[2J\033[1;1H" << "\n" << std::endl << "Thanks for playing!\n" << std::endl;
 				return 0;
+				break;
 			default:
 				std::cout << "Catastrophic error in main.cpp\nQuitting...\n";
 				return 1;
+				break;
 		}
 	}
 
@@ -71,7 +73,6 @@ mode mainMenu(void)
 	_mainMenuDisplay();
 	std::cout << "\n";
 	centerPrint("Selection: ");
-	std::cout << "\033[21;48H";
 
 	while (!(std::cin >> selection) || (selection < 1) || (selection > 3))
 	{
@@ -79,20 +80,24 @@ mode mainMenu(void)
 		getline(std::cin, garbage);
 		_mainMenuDisplay();
 		centerPrint("usage: int between 1 and 3 (inclusive)");
+		std::cout << "\n";
 		centerPrint("Selection: ");
-		std::cout << "\033[21;48H";
 	}
 	getline(std::cin, garbage);
 	switch (selection)
 	{
 		case 1:  // START corresponds to BATTLE
 			return BATTLE;
+			break;
 		case 2:  // HIGH SCORE corresponds to HSCORE
 			return HSCORE;
+			break;
 		case 3:  // QUIT corresponds to QUIT
 			return QUIT;
+			break;
 		default:
 			return HOME;  // This shouldn't be able to happen
+			break;
 	}
 }
 
@@ -111,20 +116,29 @@ void _mainMenuDisplay(void)
 	title[8] = " \\____|_____/_/   \\_\\____/___/_/   \\_\\_| \\___/|_| \\_\\";
 	std::cout << std::endl;
 	centerPrint(title[0], -3);
+	std::cout << "\n";
 	centerPrint(title[1], -3);
+	std::cout << "\n";
 	centerPrint(title[2], -2);
+	std::cout << "\n";
 	centerPrint(title[3], -2);
+	std::cout << "\n";
 	centerPrint(title[4], -1);
+	std::cout << "\n";
 	for (int i = 5; i < 9; i++)
 	{
 		centerPrint(title[i]);
+		std::cout << "\n";
 	}
 	std::cout << "\n\n";
 	centerPrint("START");
 	std::cout << "\n";
+	std::cout << "\n";
 	centerPrint("HIGH SCORE");
 	std::cout << "\n";
+	std::cout << "\n";
 	centerPrint("QUIT");
+	std::cout << "\n";
 	std::cout << "\n";
 	std::cout << std::endl;
 	return;
@@ -154,14 +168,14 @@ mode battle(const std::string *hs_file_name)
 	{
 		enemy->chooseMove();
 		_battleDisplay(player, enemy);
-		while (!(std::cin >> selection) || (selection < 0) || (selection >= player->getMoveCount()))
+		while (!(std::cin >> selection) || (selection < 1) || (selection > player->getMoveCount()))
 		{
 			std::cin.clear();
 			getline(std::cin, garbage);
 			_battleDisplay(player,enemy, true);
 		}
 		getline(std::cin, garbage);
-		player->chooseMove(selection);
+		player->chooseMove(selection + 1);
 
 		if (enemy->getHP() > 0)
 		{
@@ -211,18 +225,24 @@ void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usag
 	art[8] = "          | |               _ \\_______/     _";
 	art[9] = "           | |             / `--|    |__.--' |";
 	centerPrint(art[0], -3);
+	std::cout << "\n";
 	centerPrint(art[1], -2);
+	std::cout << "\n";
 	for (int i = 2; i < 7; i++)
 	{
 		centerPrint(art[i]);
+		std::cout << "\n";
 	}
 	centerPrint(art[7], -1);
+	std::cout << "\n";
 	centerPrint(art[8]);
+	std::cout << "\n";
 	centerPrint(art[9]);
+	std::cout << "\n";
 
 	std::string menu[14];
 	menu[0] = "";
-	for (int i = 0; i < DEF_TERM_COL - 2; i++)
+	for (int i = 0; i < DEF_TERM_COL; i++)
 	{
 		menu[0] += ">";
 	}
@@ -245,7 +265,8 @@ void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usag
 	tmp += " ";
 	tmp += std::to_string(enemy->getMoveStrength());
 	std::cout << menu[2];  // left
-	centerPrint(tmp, 999);  // right
+	centerPrint(tmp, 999, menu[2].length());  // right
+	std::cout << "\n";
 
 	menu[3] = "POISONED ";
 	for (int i = 0; ((i < enemy->getPoisoned()) && (i < 69)); i++)
@@ -255,7 +276,7 @@ void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usag
 	std::cout << menu[3] << std::endl;  // left
 
 	menu[4] = "";
-	for (int i = 0; i < DEF_TERM_COL - 2; i++)
+	for (int i = 0; i < DEF_TERM_COL; i++)
 	{
 		menu[4] += "<";
 	}
@@ -272,7 +293,8 @@ void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usag
 	}
 	tmp += " HP";
 	std::cout << menu[5];  // left
-	centerPrint(tmp, 999);  // right
+	centerPrint(tmp, 999, menu[5].length());  // right
+	std::cout << "\n";
 
 	menu[6] = "";
 	for (int i = 0; ((i < player->getBlocking()) && (i < 72)); i++)
@@ -281,6 +303,7 @@ void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usag
 	}
 	menu[6] += " BLOCK";
 	centerPrint(menu[6], 999);  // right
+	std::cout << "\n";
 
 	menu[7] = "2) ";
 	menu[7] += player->getMoveName(1);
@@ -293,7 +316,8 @@ void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usag
 	}
 	tmp += " POISONED";
 	std::cout << menu[7];  // left
-	centerPrint(tmp, 999);  // right
+	centerPrint(tmp, 999, menu[7].length());  // right
+	std::cout << "\n";
 
 	menu[8] = "";
 	std::cout << menu[8] << std::endl;  // left
@@ -328,26 +352,31 @@ mode _gameOver(void)
 	int selection;
 	std::string garbage;
 	_gameOverDisplay();
-	std::cout << "Selection: ";
-	while (!(std::cin >> selection))
+	centerPrint("Selection: ");
+	while (!(std::cin >> selection) || (selection < 1) || (selection > 3))
 	{
 		std::cin.clear();
 		getline(std::cin, garbage);
 		_gameOverDisplay();
-		std::cout << "usage:: int between 1 and 3 (inclusive)\n";
-		std::cout << "Selection: ";
+		centerPrint("usage: int between 1 and 3 (inclusive)");
+		std::cout << "\n";
+		centerPrint("Selection: ");
 	}
 	getline(std::cin, garbage);
 	switch (selection)
 	{
 		case 1:
 			return BATTLE;
+			break;
 		case 2:
 			return HSCORE;
+			break;
 		case 3:
 			return HOME;
+			break;
 		default:
 			return HOME;
+			break;
 	}
 }
 
@@ -356,13 +385,18 @@ void _gameOverDisplay(void)
 	std::cout << "\033[2J\033[1;1H";
 	std::cout << "\n" << std::endl;
 	centerPrint("GAME");
+	std::cout << "\n";
 	centerPrint("OVER");
 	std::cout << "\n";
+	std::cout << "\n";
 	centerPrint("Play again?");
+	std::cout << "\n";
 	std::cout << std::endl;
 	centerPrint("High Scores");
+	std::cout << "\n";
 	std::cout << std::endl;
 	centerPrint("Main Menu");
+	std::cout << "\n";
 	std::cout << std::endl;
 	std::cout << std::endl;
 	return;
@@ -372,10 +406,8 @@ void _gameOverDisplay(void)
 mode highScore(const std::string *hs_file_name)
 {
 	std::string garbage;
-	std::string tmp;
 	_highScoreDisplayTopTen(hs_file_name);
-	centerPrint("Enter anything to return home");
-	std::cin >> tmp;
+	centerPrint("Enter anything to return home ");
 	getline(std::cin, garbage);
 	return HOME;
 }
@@ -383,13 +415,14 @@ mode highScore(const std::string *hs_file_name)
 void _highScoreDisplayTopTen(const std::string *hs_file_name)
 {
 	std::cout << "\033[2J\033[1;1H";
+	/*
 	std::string read_str;
 	std::string disp_str;
-	/*
 	for (int i = 0; ((i < 10) && (*hs_file_name >> read_str)); i++)
 	{
 		disp_str = "Score: " + read_str;
 		centerPrint(disp_str);
+		std::cout << "\n";
 		i++;
 	}
 	*/
@@ -397,30 +430,30 @@ void _highScoreDisplayTopTen(const std::string *hs_file_name)
 }
 
 
-void centerPrint(const std::string str, const int offset)
+void centerPrint(const std::string str, const int offset, const int space_used)
 {
-	if (str.length() >= DEF_TERM_COL)
+	int avail_space =  DEF_TERM_COL - space_used;
+	if (str.length() >= avail_space)
 	{
 		for (int i = 0; i < DEF_TERM_COL; i++)
 		{
 			std::cout << str[i];
 		}
-		std::cout << std::endl;
 	}
 	else
 	{
-		int middle = DEF_TERM_COL / 2;
+		int middle = avail_space / 2;
 		int str_offset = ((str.length() - 2) / 2) * -1;
 		int total_offset = str_offset + offset + middle;
-		if (total_offset + str.length() > DEF_TERM_COL)
+		if (total_offset + str.length() > avail_space)
 		{
-			total_offset -= (total_offset + str.length() - DEF_TERM_COL);
+			total_offset -= (total_offset + str.length() - avail_space);
 		}
 		for (int i = 0; i < total_offset; i++)
 		{
 			std::cout << " ";
 		}
-		std::cout << str << std::endl;
+		std::cout << str;
 	}
 	return;
 }
