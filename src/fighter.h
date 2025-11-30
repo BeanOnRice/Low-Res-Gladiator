@@ -6,59 +6,62 @@ Description: Class for neatly holding the core stats and abilities of a fighter.
 */
 
 #pragma once
-#include <vector>
+#include <string>
 
 struct fighter_stats
 {
-	bool isPlayer = false;
+	bool is_player = false;
 	int hp = 3;   // 0 means death
 	int atk = 1;  // means base damage dealt
 	int def = 1;  // means damage blocked
-	int mag = 0;  // mana, charge up by 1 each turn when casting a spell
 
 	// processed at end of each round
-	int blocking = 0;  // take damage here first, set to 0 end of round
-				// dmg past 0 hits hp
-	int poisoned = 0;  // remove this much hp and lower by 1 (down to 0)
-}
+	int blocking = 0;  // take damage here first, lowered end of round
+	int poisoned = 0;  // remove this much hp
+};
 
-//FIXME: NEW prio just player first, then enemy
 enum effect_type { ATK, BLK, PSN };
 
 struct move_stats
 {
 	std::string name = "placeholder";
 	effect_type effect = ATK;
-	int pwr = 1;  // this + fighter base_stat = effect strength
-}
+	int pwr = 1;  // pwr + fighter base_stat = effect strength
+};
 
 class fighter
 {
 public:
 	// Initializing
-	fighter(int hp = 3, int atk = 1, int def = 1, int moves = 3, bool pc = false);  //FIXME: make .cpp match
-	void addNewMove(std::string name = "Basic attack", effect_type effect = ATK, int pwr = 1);
-	void addRandomNewMove(void);  // for giving enemy random moves
+	fighter(int hp = 3, int atk = 1, int def = 1, int moves = 3, bool pc = false);
+	~fighter();
+	void addNewMove(std::string name = "Basic Attack", effect_type effect = ATK, int pwr = 1);
+	void addRandMove(int pwr_cap = 2);
 
 	// Moves
-	void ChooseRandMove(void);  // selects random move  //FIXME: NEW
-	void useMove(void);  // uses selected move  //FIXME: NEW
-	std::string getMoveName(void) { return this->moves[chosen_move].name; };
-	effect_type getMoveEffect(void) { return this->moves[chosen_move].effect; };
-	int getMovePwr(void) { return this->moves[chosen_move].pwr; };
-	int getMovesAmount(void) { return this->moves.size(); };
+	int getMoveCount(void) { return this->moves_stocked; };
+	void chooseMove(int choice = -1);  // chooses random by default
+	void useMove(fighter *target);
+	std::string getMoveName(int choice = -1);  // no param gives move chosen by npc
+	int getMoveStrength(int choice = -1);  // no param gives move chosen by npc
+
+	// Stat changers
+	void changeHP(int change) { this->stats.hp += change; };
+	void changeATK(int change) { this->stats.atk += change; };
+	void changeDEF(int change) { this->stats.def += change; };
+	void changeBlocking(int change) { this->stats.blocking += change; };
+	void changePoisoned(int change) { this->stats.poisoned += change; };
 
 	// Core stats
-	bool player(void) { return this->stats.isPlayer; };
+	bool isPlayer(void) { return this->stats.is_player; };
 	void setHP(int hp) { this->stats.hp = hp; };
 	int getHP(void) { return this->stats.hp; };
 	void setATK(int atk) { this->stats.atk = atk; };
 	int getATK(void) { return this->stats.atk; };
 	void setDEF(int def) { this->stats.def = def; };
 	int getDEF(void) { return this->stats.def; };
-	void setMAG(int mag) { this->stats.mag = mag; };
-	int getMAG(void) { return this->stats.mag; };
 	// Status effects
+	void processStatusEffects(void);
 	void setBlocking(int block) { this->stats.blocking = block; };
 	int getBlocking(void) { return this->stats.blocking; };
 	void setPoisoned(int pois) { this->stats.poisoned = pois; };
@@ -66,6 +69,9 @@ public:
 
 private:
 	fighter_stats stats;
-	std::vector<Move_stats> moves;
-	int chosen_move;  //FIXME: NEW
-}
+	move_stats *moves = nullptr;
+	int moves_stocked = 0;
+	int moves_size = 0;
+	int chosen_move = 0;
+	bool turn_used = false;
+};

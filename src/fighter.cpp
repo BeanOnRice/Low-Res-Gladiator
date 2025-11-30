@@ -9,44 +9,183 @@ Description: Class for neatly holding the core stats and abilities of a fighter.
 
 fighter::fighter(int hp, int atk, int def, int moves, bool pc)
 {
-	this->stats.isPlayer = pc;
 	this->stats.hp = hp;
 	this->stats.atk = atk;
 	this->stats.def = def;
-	this->stats.mag = 0;
-
-	this->moves.erase();
-	for (int i = 0; i < moves; i++)
-	{
-		//FIXME add a move
-	}
+	this->stats.is_player = pc;
 	this->chosen_move = 0;
+
+	this->moves_stocked = 0;
+	this->moves_size = moves;
+	moves = new move_stats[moves_size];
 }
 
-void fighter::addNewMove(move_priority prio = ATTACK, std::string name = "Basic attack", effect_type effect = ATK, int pwr = 1)
+fighter::~fighter()
+{
+	delete[] this->moves;
+}
+
+void fighter::addNewMove(std::string name = "Basic attack", effect_type effect = ATK, int pwr = 1)
 {
 	move_stats new_move;
-	new_move.priority = prio;
 	new_move.name = name;
 	new_move.effect = effect;
 	new_move.pwr = pwr;
-	this->moves.push_back(new_move);
+
+	if (this->moves_stocked >= this->moves_size)
+	{
+		this->moves_size *= 2;
+		moves_stats *tmp = new move_stats[moves_size];
+		for (int i = 0; i < this->moves_stocked; i++)
+		{
+			tmp[i] = this->moves[i];
+		}
+		delete[] this->moves;
+		this->moves = tmp;
+	}
+
 	return;
 }
 
-void fighter::addRandomNewMove(void)  //FIXME: make random
+void fighter::addRandMove(int pwr_cap)
 {
-	//seed seeded in main.cpp
-	move_priority prio;
+	int rand_result;
+
 	std::string name;
+	int pwr = rand() % pwr_cap;
+	if (pwr <= 0)
+	{
+		pwr = 0;
+		name = "WEAK";
+	}
+	else if (pwr < 2)
+	{
+		name = "";
+	}
+	else if (pwr < 4)
+	{
+		name = "STRONG";
+	}
+	else
+	{
+		name = "COLOSSAL";
+	}
+
+	rand_result = rand() % 4;
 	effect_type effect;
-	int pwr;
+	switch (rand_result)
+	{
+		case 0:
+			effect = ATK;
+			name = name + " ATTACK";
+			break;
+		case 1:
+			effect = BLK;
+			name = name + " BLOCK";
+			break;
+		case 2:
+			effect = PSN;
+			name = name + " POISON";
+			break;
+		default:
+			effect = ATK;
+			name = name + " ATTACKE";
+			break;
+	}
+	addNewMove(name, effect, pwr);
+
+	return;
 }
 
-void fighter::use_move(int choice)
+void fighter::ChooseMove(int choice)
 {
-	//FIXME if choice == -1, choose random
-	//FIXME read move effect and priority
-		//FIXME use move
+	this->turn_used = false;
+	if (choice >= this->moves_stocked)
+	{
+		this->chosen_move = rand() % this->moves_stocked;
+	}
+	else
+	{
+		this->chosen_move = choice;
+	}
+
+	if (this->moves[chosen_move].effect == BLK)
+	{
+		useMove();  // Blocking needs to apply pre attacking
+	}
+
+	return;
+}
+
+void fighter::useMove(fighter *target = nullptr)
+{
+	if (this->turn_used == false)
+	{
+		switch (this->moves[this->chosen_move].effect)
+		{
+			case ATK:
+				target->changeHP(target->getBlocking() - this->getMoveStrength());
+				break;
+			case BLK:
+				this->changeBlocking(this->getMoveStrength());
+				break;
+			case PSN:
+				target->changePoisoned(this->getMoveStrength());
+				break;
+		}
+		this->turn_used = true;
+	}
+
+	return;
+}
+
+std::string fighter::getMoveName(int choice)
+{
+	if ((choice < 0) || (choice >= this->moves_stocked))
+	{
+		return this->moves[this->chosen_move].name;
+	}
+	else
+	{
+		return this->moves[choice].name;
+	}
+	return this->moves[choice].name;
+}
+
+int fighter::getMoveStrength(int choice)
+{
+	int nomination;
+	if ((choice < 0) || (choice >= this->moves_stocked))
+	{
+		nomination = this->chosen_move;
+	}
+	else
+	{
+		nomination = choice;
+	}
+
+	switch (this->moves[nomination].effect)
+	{
+		case ATK:
+			return (this->moves[nomination].pwr + this->stats.atk);
+			break;
+		case BLK:
+			return (this->moves[nomination].pwr + this->stats.def);
+			break;
+		case PSN:
+			return (this->moves[nomination].pwr + ((this->stats.hp + this->stats.def) / 3));
+			break;
+		default:
+			return 0;
+			break;
+	}
+}
+
+void fighter::processStatusEffects(void)
+{
+	this->changeBlocking(-1);
+	this->changeHP(this->getPoisoned());
+	this->changePoisoned(-1);
+
 	return;
 }
