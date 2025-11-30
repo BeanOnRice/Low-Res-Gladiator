@@ -69,16 +69,20 @@ mode mainMenu(void)
 	std::string garbage;
 
 	_mainMenuDisplay();
-	std::cout << "\nSelection: ";
+	std::cout << "\n";
+	centerPrint("Selection: ");
+	std::cout << "\033[21;48H";
 
 	while (!(std::cin >> selection) || (selection < 1) || (selection > 3))
 	{
 		std::cin.clear();
 		getline(std::cin, garbage);
 		_mainMenuDisplay();
-		std::cout << "usage: int between 1 and 3 (inclusive)\n";
-		std::cout << "Selection: ";
+		centerPrint("usage: int between 1 and 3 (inclusive)");
+		centerPrint("Selection: ");
+		std::cout << "\033[21;48H";
 	}
+	getline(std::cin, garbage);
 	switch (selection)
 	{
 		case 1:  // START corresponds to BATTLE
@@ -106,7 +110,11 @@ void _mainMenuDisplay(void)
 	title[7] = "| |_| | |___ / ___ \\| |_| | | / ___ \\| || |_| |  _ <";
 	title[8] = " \\____|_____/_/   \\_\\____/___/_/   \\_\\_| \\___/|_| \\_\\";
 	std::cout << std::endl;
-	for (int i = 0; i < 9; i++)
+	centerPrint(title[0], -2);
+	centerPrint(title[1], -2);
+	centerPrint(title[2], -1);
+	centerPrint(title[3], -1);
+	for (int i = 4; i < 9; i++)
 	{
 		centerPrint(title[i]);
 	}
@@ -116,6 +124,7 @@ void _mainMenuDisplay(void)
 	centerPrint("HIGH SCORE");
 	std::cout << "\n";
 	centerPrint("QUIT");
+	std::cout << "\n";
 	std::cout << std::endl;
 	return;
 }
@@ -150,6 +159,7 @@ mode battle(const std::string *hs_file_name)
 			getline(std::cin, garbage);
 			_battleDisplay(&player,enemy, true);
 		}
+		getline(std::cin, garbage);
 		player.chooseMove(selection);
 
 		if (enemy->getHP() > 0)
@@ -195,29 +205,35 @@ void _battleDisplay(fighter *player, fighter *enemy, bool print_usage)
 	art[5] = "|      __||__ /'           .|     |    ||`";
 	art[6] = " \\  .-' | |  `              l     |   _.'";
 	art[7] = "  \\/    | |                 l     |   j";
-	art[8] = "        | |                _ \\_______/     _";
-	art[9] = "        | |               / `--|    |__.--' |";
-	for (int i = 0; i < 10; i++)
+	art[8] = "         | |                _ \\_______/     _";
+	art[9] = "         | |               / `--|    |__.--' |";
+	centerPrint(art[0], -3);
+	centerPrint(art[1], -2);
+	for (int i = 2; i < 7; i++)
 	{
 		centerPrint(art[i]);
 	}
+	centerPrint(art[7], -1);
+	centerPrint(art[8]);
+	centerPrint(art[9]);
+
 	std::string menu[14];
 	menu[0] = "";
-	for (int i = 0; i < DEF_TERM_COL; i++)
+	for (int i = 0; i < DEF_TERM_COL - 2; i++)
 	{
 		menu[0] += ">";
 	}
 	std::cout << menu[0] << std::endl;
 
 	menu[1] = "HP ";
-	for (int i = 0; ((i < enemy->getHP()) && (i < 77)); i++)
+	for (int i = 0; ((i < enemy->getHP()) && (i < 75)); i++)
 	{
 		menu[1] += "#";
 	}
 	std::cout << menu[1] << std::endl;  // left
 
 	menu[2] = "BLOCK ";
-	for (int i = 0; ((i < enemy->getBlocking()) && (i < 50)); i++)
+	for (int i = 0; ((i < enemy->getBlocking()) && (i < 48)); i++)
 	{
 		menu[2] += "#";
 	}
@@ -229,14 +245,14 @@ void _battleDisplay(fighter *player, fighter *enemy, bool print_usage)
 	centerPrint(tmp, 999);  // right
 
 	menu[3] = "POISONED ";
-	for (int i = 0; ((i < enemy->getPoisoned()) && (i < 71)); i++)
+	for (int i = 0; ((i < enemy->getPoisoned()) && (i < 69)); i++)
 	{
 		menu[3] += "#";
 	}
 	std::cout << menu[3] << std::endl;  // left
 
 	menu[4] = "";
-	for (int i = 0; i < 80; i++)
+	for (int i = 0; i < DEF_TERM_COL - 2; i++)
 	{
 		menu[4] += "<";
 	}
@@ -247,7 +263,7 @@ void _battleDisplay(fighter *player, fighter *enemy, bool print_usage)
 	menu[5] += " ";
 	menu[5] += std::to_string(player->getMoveStrength(0));
 	tmp = "";
-	for (int i = 0; ((i < player->getHP()) && (i < (77 - menu[5].length()))); i++)
+	for (int i = 0; ((i < player->getHP()) && (i < (75 - menu[5].length()))); i++)
 	{
 		tmp += "#";
 	}
@@ -256,7 +272,7 @@ void _battleDisplay(fighter *player, fighter *enemy, bool print_usage)
 	centerPrint(tmp, 999);  // right
 
 	menu[6] = "";
-	for (int i = 0; ((i < player->getBlocking()) && (i < 74)); i++)
+	for (int i = 0; ((i < player->getBlocking()) && (i < 72)); i++)
 	{
 		menu[6] += "#";
 	}
@@ -268,7 +284,7 @@ void _battleDisplay(fighter *player, fighter *enemy, bool print_usage)
 	menu[7] += " ";
 	menu[7] += std::to_string(player->getMoveStrength(1));
 	tmp = "";
-	for (int i = 0; ((i < player->getPoisoned()) && (i < 71)); i++)
+	for (int i = 0; ((i < player->getPoisoned()) && (i < 69)); i++)
 	{
 		tmp += "#";
 	}
@@ -318,6 +334,7 @@ mode _gameOver(void)
 		std::cout << "usage:: int between 1 and 3 (inclusive)\n";
 		std::cout << "Selection: ";
 	}
+	getline(std::cin, garbage);
 	switch (selection)
 	{
 		case 1:
@@ -350,10 +367,12 @@ void _gameOverDisplay(void)
 
 mode highScore(const std::string *hs_file_name)
 {
+	std::string garbage;
 	std::string tmp;
 	_highScoreDisplayTopTen(hs_file_name);
 	centerPrint("Enter anything to return home");
 	std::cin >> tmp;
+	getline(std::cin, garbage);
 	return HOME;
 }
 
