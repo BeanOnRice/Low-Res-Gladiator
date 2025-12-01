@@ -233,32 +233,39 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 	}
 	std::cout << menu[0] << std::endl;
 
-	menu[1] = "HP ";
-	for (int i = 0; ((i < enemy->getHP()) && (i < 75)); i++)
+	if (enemy != nullptr)
 	{
-		menu[1] += "#";
-	}
-	std::cout << menu[1] << std::endl;  // left
+		menu[1] = "HP ";
+		for (int i = 0; ((i < enemy->getHP()) && (i < 75)); i++)
+		{
+			menu[1] += "#";
+		}
+		std::cout << menu[1] << std::endl;  // left
 
-	menu[2] = "BLOCK ";
-	for (int i = 0; ((i < enemy->getBlocking()) && (i < 48)); i++)
-	{
-		menu[2] += "#";
-	}
-	tmp = "USING ";
-	tmp += enemy->getMoveName();
-	tmp += " ";
-	tmp += std::to_string(enemy->getMoveStrength());
-	std::cout << menu[2];  // left
-	centerPrint(tmp, 999, menu[2].length());  // right
-	std::cout << "\n";
+		menu[2] = "BLOCK ";
+		for (int i = 0; ((i < enemy->getBlocking()) && (i < 48)); i++)
+		{
+			menu[2] += "#";
+		}
+		tmp = "USING ";
+		tmp += enemy->getMoveName();
+		tmp += " ";
+		tmp += std::to_string(enemy->getMoveStrength());
+		std::cout << menu[2];  // left
+		centerPrint(tmp, 999, menu[2].length());  // right
+		std::cout << "\n";
 
-	menu[3] = "POISONED ";
-	for (int i = 0; ((i < enemy->getPoisoned()) && (i < 69)); i++)
-	{
-		menu[3] += "#";
+		menu[3] = "POISONED ";
+		for (int i = 0; ((i < enemy->getPoisoned()) && (i < 69)); i++)
+		{
+			menu[3] += "#";
+		}
+		std::cout << menu[3] << std::endl;  // left
 	}
-	std::cout << menu[3] << std::endl;  // left
+	else
+	{
+		std::cout << "\n\n\n";
+	}
 
 	menu[4] = "";
 	for (int i = 0; i < DEF_TERM_COL; i++)
@@ -267,67 +274,78 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 	}
 	std::cout << menu[4] << std::endl;
 
-	menu[5] = "1) ";
-	menu[5] += player->getMoveName(0);
-	menu[5] += " ";
-	menu[5] += std::to_string(player->getMoveStrength(0));
-	tmp = "";
-	for (int i = 0; ((i < player->getHP()) && (i < (75 - menu[5].length()))); i++)
+	if (player != nullptr)
 	{
-		tmp += "#";
-	}
-	tmp += " HP";
-	std::cout << menu[5];  // left
-	centerPrint(tmp, 999, menu[5].length());  // right
-	std::cout << "\n";
+		menu[5] = "1) ";
+		menu[5] += player->getMoveName(0);
+		menu[5] += " ";
+		menu[5] += std::to_string(player->getMoveStrength(0));
+		tmp = "";
+		for (int i = 0; ((i < player->getHP()) && (i < (75 - menu[5].length()))); i++)
+		{
+			tmp += "#";
+		}
+		tmp += " HP";
+		std::cout << menu[5];  // left
+		centerPrint(tmp, 999, menu[5].length());  // right
+		std::cout << "\n";
 
-	menu[6] = "";
-	for (int i = 0; ((i < player->getBlocking()) && (i < 72)); i++)
-	{
-		menu[6] += "#";
-	}
-	menu[6] += " BLOCK";
-	centerPrint(menu[6], 999);  // right
-	std::cout << "\n";
+		menu[6] = "";
+		for (int i = 0; ((i < player->getBlocking()) && (i < 72)); i++)
+		{
+			menu[6] += "#";
+		}
+		menu[6] += " BLOCK";
+		centerPrint(menu[6], 999);  // right
+		std::cout << "\n";
 
-	menu[7] = "2) ";
-	menu[7] += player->getMoveName(1);
-	menu[7] += " ";
-	menu[7] += std::to_string(player->getMoveStrength(1));
-	tmp = "";
-	for (int i = 0; ((i < player->getPoisoned()) && (i < 69)); i++)
-	{
-		tmp += "#";
-	}
-	tmp += " POISONED";
-	std::cout << menu[7];  // left
-	centerPrint(tmp, 999, menu[7].length());  // right
-	std::cout << "\n";
+		menu[7] = "2) ";
+		menu[7] += player->getMoveName(1);
+		menu[7] += " ";
+		menu[7] += std::to_string(player->getMoveStrength(1));
+		tmp = "";
+		for (int i = 0; ((i < player->getPoisoned()) && (i < 69)); i++)
+		{
+			tmp += "#";
+		}
+		tmp += " POISONED";
+		std::cout << menu[7];  // left
+		centerPrint(tmp, 999, menu[7].length());  // right
+		std::cout << "\n";
 
-	menu[8] = "";
-	std::cout << menu[8] << std::endl;  // left
+		menu[8] = "";
+		std::cout << menu[8] << std::endl;  // left
 
-	menu[9] = "3) ";
-	menu[9] += player->getMoveName(2);
-	menu[9] += " ";
-	menu[9] += std::to_string(player->getMoveStrength(2));
-	std::cout << menu[9] << std::endl;  // left
+		menu[9] = "3) ";
+		menu[9] += player->getMoveName(2);
+		menu[9] += " ";
+		menu[9] += std::to_string(player->getMoveStrength(2));
+		std::cout << menu[9] << std::endl;  // left
 
-	menu[10] = "";
-	std::cout << menu[10] << std::endl;  // left
+		menu[10] = "";
+		std::cout << menu[10] << std::endl;  // left
 
-	if (print_usage == true)
-	{
-		menu[11] = "usage: <int> in range 1 to 3 (inclusive)";
+		if (print_usage == true)
+		{
+			menu[11] = "usage: <int> in range 1 to 3 (inclusive)";
+		}
+		else
+		{
+			menu[11] = "";
+		}
+		std::cout << menu[11] << std::endl;
+
+		menu[12] = "Choose a move: ";
+		std::cout << menu[12];
 	}
 	else
 	{
-		menu[11] = "";
+		std::cout << "\n\n\n";
+		centerPrint("Player is missing!!!");
+		std::cout << "\n\n";
+		centerPrint("If you are seeing this message");
+		centerPrint("Just ^C the program please");
 	}
-	std::cout << menu[11] << std::endl;
-
-	menu[12] = "Choose a move: ";
-	std::cout << menu[12];
 
 	return;
 }
@@ -368,8 +386,9 @@ void _battleVictoryDisplay(void)
 	clearScreen();
 	std::cout << "\n\n\n";
 	centerPrint("LEVEL");
-	centerPrint("UP");
 	std::cout << "\n";
+	centerPrint("UP");
+	std::cout << "\n\n";
 	centerPrint("Input Anything");
 	std::cout << "\n\n\n\n";
 	return;
@@ -488,8 +507,6 @@ void centerPrint(const std::string str, const int offset, const int space_used)
 
 void clearScreen(void)
 {
-	std::string trash;
-	getline(std::cin, trash);
 	std::cout << "\033[2J\033[1;1";
 	return;
 }
