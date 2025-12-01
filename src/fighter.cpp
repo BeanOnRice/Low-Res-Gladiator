@@ -40,11 +40,11 @@ void fighter::addNewMove(const std::string name, const std::string effect, int p
 	{
 		new_move.effect = ATK;
 	}
-	else if (effect.compare("BLK"))
+	else if (effect.compare("BLK") == 0)
 	{
 		new_move.effect = BLK;
 	}
-	else if (effect.compare("PSN"))
+	else if (effect.compare("PSN") == 0)
 	{
 		new_move.effect = PSN;
 	}
@@ -225,7 +225,7 @@ void fighter::processStatusEffects(void)
 	}
 	if (this->stats.poisoned > 0)
 	{
-		this->changeHP(this->getPoisoned());
+		this->changeHP(-1 * this->getPoisoned());
 		this->changePoisoned(-1);
 	}
 	if (this->stats.blocking < 0)

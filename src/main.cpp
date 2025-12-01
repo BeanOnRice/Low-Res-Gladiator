@@ -197,15 +197,16 @@ mode battle(const std::string *hs_file_name)
 		player->processStatusEffects();
 		if (enemy->getHP() <= 0)
 		{
+			round++;
 			delete enemy;
 			score += round * round;
 			// player level up
-			player->changeHP(2);
 			player->changeHP(rand() % 2);
 			player->changeATK(rand() % 2);
 			player->changeDEF(rand() % 2);
 			_battleVictoryDisplay();
 			_battleMenu(player, nullptr);
+			getline(std::cin, battle_garbage_str);
 
 			enemy = new fighter((rand() % round) + 3, (rand() % round) + 1, (rand() % round + 1));
 			for (int i = 0; i < 3; i++)
@@ -226,7 +227,7 @@ mode battle(const std::string *hs_file_name)
 	}
 	else
 	{
-		std::cout << "Saving high score failed\n";  //FIXME: replace with logger
+		std::cout << "Saving high score failed\n";
 	}
 	return gameOver();
 }
@@ -398,9 +399,9 @@ void _battleVictoryDisplay(void)
 	std::cout << "\n\n\n";
 	centerPrint("LEVEL");
 	std::cout << "\n";
-	centerPrint("UP");
+	centerPrint("UP!");
 	std::cout << "\n\n";
-	centerPrint("Input Anything");
+	centerPrint("(Input Anything)");
 	std::cout << "\n\n\n\n";
 	return;
 }
