@@ -144,12 +144,23 @@ void fighter::chooseMove(int choice)
 
 void fighter::useMove(fighter *target)
 {
+	int dmg = 0;
 	if (this->turn_used == false)
 	{
 		switch (this->moves[this->chosen_move].effect)
 		{
 			case ATK:
-				target->changeHP(target->getBlocking() - this->getMoveStrength());
+				dmg = this->getMoveStrength();
+				if (target->getBlocking() > dmg)
+				{
+					target->changeBlocking(-1 * dmg);
+				}
+				else
+				{
+					dmg -= target->getBlocking();
+					target->setBlocking(0);
+					target->changeHP(-1 * dmg);
+				}
 				break;
 			case BLK:
 				this->changeBlocking(this->getMoveStrength());
@@ -216,6 +227,14 @@ void fighter::processStatusEffects(void)
 	{
 		this->changeHP(this->getPoisoned());
 		this->changePoisoned(-1);
+	}
+	if (this->stats.blocking < 0)
+	{
+		this->stats.blocking = 0;
+	}
+	if (this->stats.poisoned < 0)
+	{
+		this->stats.poisoned = 0;
 	}
 
 	return;
