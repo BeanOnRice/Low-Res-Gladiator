@@ -4,13 +4,13 @@ Author: Jesus Treto Jr.
 Date: 11/28/25
 Description: Provides interface for user of Low Res Gladiator game
 */
-//NOTE: needs file hs.txt to be in same directory (or folder)
 
 #include <iostream>
 #include <fstream>
 #include "fighter.h"
 #include <time.h>
 #include <string>
+#include <vector>
 
 // Default terminal rows and columns for most terminals
 #define DEF_TERM_ROW 24
@@ -58,7 +58,9 @@ int main(int argc, char **argv)
 				break;
 			case QUIT:
 				clearScreen();
-				std::cout << "\n" << std::endl << "Thanks for playing!\n" << std::endl;
+				std::cout << "\n" << std::endl;
+				centerPrint("Thanks for playing!");
+				std::cout << "\n\n" << std::endl;
 				return 0;
 				break;
 			default:
@@ -214,9 +216,18 @@ mode battle(const std::string *hs_file_name)
 	}
 	delete player;
 	delete enemy;
-	//FIXME: add score into highscore list
-	//FIXME: sort highscore list as well
-	//FIXME: highscore list CANT go over 10 entries
+	std::ofstream hs_out;
+	hs_out.open(*hs_file_name, std::ofstream::out | std::ofstream::app);
+	if (hs_out.is_open())
+	{
+		hs_out << score;
+		hs_out << " ";
+		hs_out.close();
+	}
+	else
+	{
+		std::cout << "Saving high score failed\n";  //FIXME: replace with logger
+	}
 	return gameOver();
 }
 
@@ -462,17 +473,66 @@ mode highScore(const std::string *hs_file_name)
 void _highScoreDisplay(const std::string *hs_file_name)
 {
 	clearScreen();
-	/*
-	std::string read_str;
-	std::string disp_str;
-	for (int i = 0; ((i < 10) && (*hs_file_name >> read_str)); i++)
+	std::ifstream hs_in;
+	hs_in.open(*hs_file_name);
+	int tmp_int;
+	std::string tmp_str;
+	std::vector<int> hs_list;
+	hs_list.clear();
+
+	std::cout << "\n\n\n";
+	centerPrint("HIGH");
+	std::cout << "\n";
+	centerPrint("SCORES");
+	std::cout << "\n\n";
+	if (hs_in.is_open())
 	{
-		disp_str = "Score: " + read_str;
-		centerPrint(disp_str);
-		std::cout << "\n";
-		i++;
+		while (hs_in >> tmp_int)
+		{
+			if (hs_list.size() == 0)
+			{
+				hs_list.push_back(tmp_int);
+			}
+			else
+			{
+				for (int i = 0; i < hs_list.size(); i++)
+				{
+					if (tmp_int > hs_list[i])
+					{
+						hs_list.insert(hs_list.begin() + i, tmp_int);
+						break;
+					}
+					if (i == hs_list.size() - 1)  // smallest, end of list
+					{
+						hs_list.push_back(tmp_int);
+						break;
+					}
+				}
+			}
+		}
+		for (int i = 0; ((i < hs_list.size()) && (i < 10)); i++)  // Only ever display top 10 scores
+		{
+			tmp_str = "RANK ";
+			if (i != 9)  // RANK X instead of RANK 10
+			{
+				tmp_str += std::to_string(i + 1);
+			}
+			else
+			{
+				tmp_str += "X";
+			}
+			tmp_str += ": ";
+			centerPrint(tmp_str, -1);
+			std::cout << std::to_string(hs_list[i]);
+			std::cout << std::endl;
+		}
 	}
-	*/
+	else
+	{
+		centerPrint("No Recorded High Scores");
+	}
+	std::cout << "\n\n" << std::endl;
+
 	return;
 }
 
@@ -507,6 +567,6 @@ void centerPrint(const std::string str, const int offset, const int space_used)
 
 void clearScreen(void)
 {
-	std::cout << "\033[2J\033[1;1";
+	std::cout << "\033[2J\033[1;1H";
 	return;
 }
