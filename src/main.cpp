@@ -21,19 +21,25 @@ void centerPrint(const std::string str, const int offset = 0, const int spaces_u
 enum mode { HOME, BATTLE, HSCORE, QUIT };
 
 
-void _mainMenuDisplay(void);
 mode mainMenu(void);
+void _mainMenuDisplay(void);
 
-mode _gameOver(void);
-void _gameOverDisplay(void);  //FIXME: needs looks touch up
-void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usage = false);
 mode battle(const std::string *hs_file_name);
+void _battleEnemyDisplay(void);
+void _battleVictoryDisplay(void);
+void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage = false);
 
-void _highScoreDisplayTopTen(const std::string *hs_file_name);  //FIXME: needs looks touch up
+mode gameOver(void);
+void _gameOverDisplay(void);
+
 mode highScore(const std::string *hs_file_name);
+void _highScoreDisplay(const std::string *hs_file_name);
+
+void clearScreen(void);
 
 int main(int argc, char **argv)
 {
+	clearScreen();
 	srand(time(nullptr));
 	std::string hs_file_name = "hs.txt";
 	mode cur_mode = HOME;
@@ -51,7 +57,8 @@ int main(int argc, char **argv)
 				cur_mode = highScore(&hs_file_name);
 				break;
 			case QUIT:
-				std::cout << "\033[2J\033[1;1H" << "\n" << std::endl << "Thanks for playing!\n" << std::endl;
+				clearScreen();
+				std::cout << "\n" << std::endl << "Thanks for playing!\n" << std::endl;
 				return 0;
 				break;
 			default:
@@ -103,7 +110,7 @@ mode mainMenu(void)
 
 void _mainMenuDisplay(void)
 {
-	std::cout << "\033[2J\033[1;1H";
+	clearScreen();
 	std::string title[9];
 	title[0] = "       _     _____        __  ____  _____ ____";
 	title[1] = "      | |   / _ \\ \\      / / |  _ \\| ____/ ___|";
@@ -147,7 +154,7 @@ void _mainMenuDisplay(void)
 
 mode battle(const std::string *hs_file_name)
 {
-	std::string garbage;
+	std::string battle_garbage_str;
 	int selection;
 
 	fighter *player = new fighter(5, 2, 3, 3, true);
@@ -167,15 +174,18 @@ mode battle(const std::string *hs_file_name)
 	while (player->getHP() > 0)
 	{
 		enemy->chooseMove();
-		_battleDisplay(player, enemy);
+		_battleEnemyDisplay();
+		_battleMenu(player, enemy);
 		while (!(std::cin >> selection) || (selection < 1) || (selection > player->getMoveCount()))
 		{
 			std::cin.clear();
-			getline(std::cin, garbage);
-			_battleDisplay(player,enemy, true);
+			getline(std::cin, battle_garbage_str);
+			_battleEnemyDisplay();
+			_battleMenu(player,enemy, true);
 		}
-		getline(std::cin, garbage);
-		player->chooseMove(selection + 1);
+		getline(std::cin, battle_garbage_str);
+		player->chooseMove(selection - 1);
+		player->useMove(enemy);
 
 		if (enemy->getHP() > 0)
 		{
@@ -192,6 +202,8 @@ mode battle(const std::string *hs_file_name)
 			player->changeHP(rand() % 2);
 			player->changeATK(rand() % 2);
 			player->changeDEF(rand() % 2);
+			_battleVictoryDisplay();
+			_battleMenu(player, nullptr);
 
 			enemy = new fighter((rand() % round) + 3, (rand() % round) + 1, (rand() % round + 1));
 			for (int i = 0; i < 3; i++)
@@ -205,40 +217,13 @@ mode battle(const std::string *hs_file_name)
 	//FIXME: add score into highscore list
 	//FIXME: sort highscore list as well
 	//FIXME: highscore list CANT go over 10 entries
-	return _gameOver();
+	return gameOver();
 }
 
-void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usage)
+void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 {
 	std::string tmp;
-	std::cout << "\033[2J\033[1;1H";
-	std::string line[DEF_TERM_ROW];
-	std::string art[10];
-	art[0] = "                              ,.-----._";
-	art[1] = "   .                         /         \\,";
-	art[2] = " / \\    ,^.                Y_____        \\";
-	art[3] = "/   `----\\|--'\\           .'     \\       '\"";
-	art[4] = "|        ||    `>          l      \\     _l";
-	art[5] = "|      __||__ /'           .|     |    ||`";
-	art[6] = " \\  .-' | |  `              l     |   _.'";
-	art[7] = "  \\/    | |                 l     |   j";
-	art[8] = "          | |               _ \\_______/     _";
-	art[9] = "           | |             / `--|    |__.--' |";
-	centerPrint(art[0], -3);
-	std::cout << "\n";
-	centerPrint(art[1], -2);
-	std::cout << "\n";
-	for (int i = 2; i < 7; i++)
-	{
-		centerPrint(art[i]);
-		std::cout << "\n";
-	}
-	centerPrint(art[7], -1);
-	std::cout << "\n";
-	centerPrint(art[8]);
-	std::cout << "\n";
-	centerPrint(art[9]);
-	std::cout << "\n";
+	std::string line[14];
 
 	std::string menu[14];
 	menu[0] = "";
@@ -347,7 +332,50 @@ void _battleDisplay(const fighter *player, const fighter *enemy, bool print_usag
 	return;
 }
 
-mode _gameOver(void)
+void _battleEnemyDisplay(void)
+{
+	clearScreen();
+	std::string art[10];
+	art[0] = "                              ,.-----._";
+	art[1] = "   .                         /         \\,";
+	art[2] = " / \\    ,^.                Y_____        \\";
+	art[3] = "/   `----\\|--'\\           .'     \\       '\"";
+	art[4] = "|        ||    `>          l      \\     _l";
+	art[5] = "|      __||__ /'           .|     |    ||`";
+	art[6] = " \\  .-' | |  `              l     |   _.'";
+	art[7] = "  \\/    | |                 l     |   j";
+	art[8] = "          | |               _ \\_______/     _";
+	art[9] = "           | |             / `--|    |__.--' |";
+	centerPrint(art[0], -3);
+	std::cout << "\n";
+	centerPrint(art[1], -2);
+	std::cout << "\n";
+	for (int i = 2; i < 7; i++)
+	{
+		centerPrint(art[i]);
+		std::cout << "\n";
+	}
+	centerPrint(art[7], -1);
+	std::cout << "\n";
+	centerPrint(art[8]);
+	std::cout << "\n";
+	centerPrint(art[9]);
+	std::cout << "\n";
+	return;
+}
+void _battleVictoryDisplay(void)
+{
+	clearScreen();
+	std::cout << "\n\n\n";
+	centerPrint("LEVEL");
+	centerPrint("UP");
+	std::cout << "\n";
+	centerPrint("Input Anything");
+	std::cout << "\n\n\n\n";
+	return;
+}
+
+mode gameOver(void)
 {
 	int selection;
 	std::string garbage;
@@ -382,7 +410,7 @@ mode _gameOver(void)
 
 void _gameOverDisplay(void)
 {	
-	std::cout << "\033[2J\033[1;1H";
+	clearScreen();
 	std::cout << "\n" << std::endl;
 	centerPrint("GAME");
 	std::cout << "\n";
@@ -406,15 +434,15 @@ void _gameOverDisplay(void)
 mode highScore(const std::string *hs_file_name)
 {
 	std::string garbage;
-	_highScoreDisplayTopTen(hs_file_name);
+	_highScoreDisplay(hs_file_name);
 	centerPrint("Enter anything to return home ");
 	getline(std::cin, garbage);
 	return HOME;
 }
 
-void _highScoreDisplayTopTen(const std::string *hs_file_name)
+void _highScoreDisplay(const std::string *hs_file_name)
 {
-	std::cout << "\033[2J\033[1;1H";
+	clearScreen();
 	/*
 	std::string read_str;
 	std::string disp_str;
@@ -455,5 +483,13 @@ void centerPrint(const std::string str, const int offset, const int space_used)
 		}
 		std::cout << str;
 	}
+	return;
+}
+
+void clearScreen(void)
+{
+	std::string trash;
+	getline(std::cin, trash);
+	std::cout << "\033[2J\033[1;1";
 	return;
 }

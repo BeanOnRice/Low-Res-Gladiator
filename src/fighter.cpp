@@ -125,7 +125,7 @@ void fighter::addRandMove(int pwr_cap)
 void fighter::chooseMove(int choice)
 {
 	this->turn_used = false;
-	if (choice >= this->moves_stocked)
+	if (choice >= this->moves_stocked || (choice < 0))
 	{
 		this->chosen_move = rand() % this->moves_stocked;
 	}
@@ -208,9 +208,15 @@ int fighter::getMoveStrength(int choice) const
 
 void fighter::processStatusEffects(void)
 {
-	this->changeBlocking(-1);
-	this->changeHP(this->getPoisoned());
-	this->changePoisoned(-1);
+	if (this->stats.blocking > 0)
+	{
+		this->changeBlocking(-1);
+	}
+	if (this->stats.poisoned > 0)
+	{
+		this->changeHP(this->getPoisoned());
+		this->changePoisoned(-1);
+	}
 
 	return;
 }
