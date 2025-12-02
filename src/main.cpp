@@ -13,10 +13,14 @@ Description: Provides interface for user of Low Res Gladiator game
 #include <vector>
 
 // Default terminal rows and columns for most terminals
+// Everything related to terminal size uses these since methods for finding terminal size vary depending on OS and terminal used
 #define DEF_TERM_ROW 24
 #define DEF_TERM_COL 80
 
-void centerPrint(const std::string str, const int offset = 0, const int spaces_used = 0);
+// utility function
+void clearScreen(void);
+int centerPrint(const std::string str, const int offset = 0, const int spaces_used = 0);  // prints str into center of terminal
+int getInt(void);  // gets int from user without crashing if char is typed in instead
 
 enum mode { HOME, BATTLE, HSCORE, QUIT };
 
@@ -35,7 +39,6 @@ void _gameOverDisplay(void);
 mode highScore(const std::string *hs_file_name);
 void _highScoreDisplay(const std::string *hs_file_name);
 
-void clearScreen(void);
 
 int main(int argc, char **argv)
 {
@@ -65,12 +68,12 @@ int main(int argc, char **argv)
 				break;
 			default:
 				std::cout << "Catastrophic error in main.cpp\nQuitting...\n";
-				return 1;
+				return -1;
 				break;
 		}
 	}
 
-	return 2;
+	return -2;  // should be unreachable
 }
 
 
@@ -538,14 +541,16 @@ void _highScoreDisplay(const std::string *hs_file_name)
 }
 
 
-void centerPrint(const std::string str, const int offset, const int space_used)
+int centerPrint(const std::string str, const int offset, const int space_used)
 {
+	int count = 0;  // tracks amount of space on line used by function
 	int avail_space =  DEF_TERM_COL - space_used;
 	if (str.length() >= avail_space)
 	{
 		for (int i = 0; i < DEF_TERM_COL; i++)
 		{
 			std::cout << str[i];
+			count++;
 		}
 	}
 	else
@@ -560,14 +565,36 @@ void centerPrint(const std::string str, const int offset, const int space_used)
 		for (int i = 0; i < total_offset; i++)
 		{
 			std::cout << " ";
+			count++;
 		}
-		std::cout << str;
+		for (int i = 0; i < str.length(); i++)
+		{
+			std::cout << str[i];
+			count++;
+		}
 	}
-	return;
+	return count;
 }
 
 void clearScreen(void)
 {
 	std::cout << "\033[2J\033[1;1H";
+	/*
+	 * /033 is octal escape sequence
+	 * [2J clears screen
+	 * [1;1H resets cursor to top left of terminal
+	 */
 	return;
+}
+
+int getInt(void)
+{
+	std::string garbage;
+	int input;
+	while (!(std::cin >> input))
+	{
+		std::cin.clear();
+		getline(std::cin, garbage);
+	}
+	return input;
 }
