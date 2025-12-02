@@ -20,7 +20,7 @@ Description: Provides interface for user of Low Res Gladiator game
 // utility function
 void clearScreen(void);
 int centerPrint(const std::string str, const int offset = 0, const int spaces_used = 0);  // prints str into center of terminal
-int getInt(void);  // gets int from user without crashing if char is typed in instead
+int getInt(const std::string prompt = "Enter an int: ", const std::string usage = "usage: <int>");  // prompts and gets int from user. Prints usage message if input invalid
 
 enum mode { HOME, BATTLE, HSCORE, QUIT };
 
@@ -580,21 +580,32 @@ void clearScreen(void)
 {
 	std::cout << "\033[2J\033[1;1H";
 	/*
-	 * /033 is octal escape sequence
-	 * [2J clears screen
-	 * [1;1H resets cursor to top left of terminal
-	 */
+	   \033 is octal escape sequence
+	   [2J clears screen
+	   [1;1H resets cursor to top left of terminal
+	   */
 	return;
 }
 
-int getInt(void)
+int getInt(const std::string prompt, const std::string usage)
 {
 	std::string garbage;
 	int input;
+	std::cout << prompt;
 	while (!(std::cin >> input))
 	{
 		std::cin.clear();
 		getline(std::cin, garbage);
+		std::cout << usage;
+		// return cursor to where it was before user input and erases what was written after (except for the usage message)
+		std::cout << "\033[1F\033[" << std::to_string(prompt.length()) << "C\033[0K";
+		/*
+		   \033 is octal escape sequence
+		   [1F moves cursor up one row
+		   [?C moves cursor right ? columns
+		   [0K erases everything from cursor to end of line
+		   */
 	}
+	std::cout << "\033[0K";  // clears usage message
 	return input;
 }
