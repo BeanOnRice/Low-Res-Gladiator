@@ -17,10 +17,11 @@ Description: Provides interface for user of Low Res Gladiator game
 #define DEF_TERM_ROW 24
 #define DEF_TERM_COL 80
 
-// utility function
+// utility functions
 void clearScreen(void);
 int centerPrint(const std::string str, const int offset = 0, const int spaces_used = 0);  // prints str into center of terminal
-int getInt(const std::string prompt = "Enter an int: ", const std::string usage = "usage: <int>");  // prompts and gets int from user. Prints usage message if input invalid
+int getInt(const std::string prompt = "Enter an int: ", const std::string usage = "usage: <int>");  // prompts and gets int from user. Prints usage message and tries again if input invalid
+int getIntInRange(int start, int end, const std::string prompt = "", const std::string usage = "");  // prompts and gets int inside of range start-end (inclusive), prints usage message and tries again if input invalid
 
 enum mode { HOME, BATTLE, HSCORE, QUIT };
 
@@ -606,6 +607,41 @@ int getInt(const std::string prompt, const std::string usage)
 		   [0K erases everything from cursor to end of line
 		   */
 	}
+
 	std::cout << "\033[0K";  // clears usage message
+	std::cout << "\033[1F\033[0K";  // clears prompt
+	return input;
+}
+
+
+int getIntInRange(int start, int end, const std::string prompt, const std::string usage)
+{
+	std::string good_prompt = prompt;
+	std::string good_usage = usage;
+	// if no custom message was input
+	if (good_prompt.compare("") == 0)
+	{
+		good_prompt = "enter int in range ";
+		good_prompt += std::to_string(start);
+		good_prompt += " - ";
+		good_prompt += std::to_string(end);
+		good_prompt += " (inclusive)";
+	}
+	if (usage.compare("") == 0)
+	{
+		good_usage = "usage: <int> in range ";
+		good_usage += std::to_string(start);
+		good_usage += " - ";
+		good_usage += std::to_string(end);
+		good_usage += " (inclusive)";
+	}
+
+	int input;
+	do
+	{
+		input = getInt(good_prompt, good_usage);
+	}
+	while ((input < start) || (input > end));
+
 	return input;
 }
