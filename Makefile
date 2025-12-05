@@ -28,7 +28,6 @@ CPPFLAGS := $(INC_FLAGS) -MMD -MP
 # final build step
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
-	ls $(BUILD_DIR)
 
 # Build step for c++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
