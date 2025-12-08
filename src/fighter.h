@@ -73,4 +73,4 @@ private:
 	int moves_size = 0;
 	int chosen_move = 0;
 	bool turn_used = false;
-	};
+};

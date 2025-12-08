@@ -8,6 +8,7 @@ Description: Provides interface for user of Low Res Gladiator game
 #include <iostream>
 #include <fstream>
 #include "fighter.h"
+#include "strformat.h"
 #include <time.h>
 #include <string>
 #include <vector>
@@ -17,22 +18,21 @@ Description: Provides interface for user of Low Res Gladiator game
 #define DEF_TERM_ROW 24
 #define DEF_TERM_COL 80
 
+enum mode { HOME, BATTLE, HSCORE, QUIT };
+
 // utility functions
 void clearScreen(void);
-int centerPrint(const std::string str, const int offset = 0, const int spaces_used = 0);  // prints str into center of terminal
 int getInt(const std::string prompt = "Enter an int: ", const std::string usage = "usage: <int>");  // prompts and gets int from user. Prints usage message and tries again if input invalid
 int getIntInRange(int start, int end, const std::string prompt = "", const std::string usage = "");  // prompts and gets int inside of range start-end (inclusive), prints usage message and tries again if input invalid
 
-enum mode { HOME, BATTLE, HSCORE, QUIT };
-
-
+// menu functions. '_' at front means built for function starting with same word
 mode mainMenu(void);
 void _mainMenuDisplay(void);
 
 mode battle(const std::string *hs_file_name);
 void _battleEnemyDisplay(void);
 void _battleVictoryDisplay(void);
-void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage = false);
+void _battleMenu(const fighter *player, const fighter *enemy);
 
 mode gameOver(void);
 void _gameOverDisplay(void);
@@ -43,6 +43,7 @@ void _highScoreDisplay(const std::string *hs_file_name);
 
 int main(int argc, char **argv)
 {
+	strformat frm;
 	clearScreen();
 	srand(time(nullptr));
 	std::string hs_file_name = "hs.txt";
@@ -63,7 +64,7 @@ int main(int argc, char **argv)
 			case QUIT:
 				clearScreen();
 				std::cout << "\n" << std::endl;
-				centerPrint("Thanks for playing!");
+				frm.centerPrint("Thanks for playing!");
 				std::cout << "\n\n" << std::endl;
 				return 0;
 				break;
@@ -80,23 +81,13 @@ int main(int argc, char **argv)
 
 mode mainMenu(void)
 {
+	strformat frm;
 	int selection;
-	std::string garbage;
 
 	_mainMenuDisplay();
 	std::cout << "\n";
-	centerPrint("Selection: ");
+	selection = getIntInRange(1, 3, frm.centerStr("Selection: "), frm.centerStr("usage: int between 1 and 3 (inclusive)"));
 
-	while (!(std::cin >> selection) || (selection < 1) || (selection > 3))
-	{
-		std::cin.clear();
-		getline(std::cin, garbage);
-		_mainMenuDisplay();
-		centerPrint("usage: int between 1 and 3 (inclusive)");
-		std::cout << "\n";
-		centerPrint("Selection: ");
-	}
-	getline(std::cin, garbage);
 	switch (selection)
 	{
 		case 1:  // START corresponds to BATTLE
@@ -116,6 +107,7 @@ mode mainMenu(void)
 
 void _mainMenuDisplay(void)
 {
+	strformat frm;
 	clearScreen();
 	std::string title[9];
 	title[0] = "       _     _____        __  ____  _____ ____";
@@ -128,29 +120,29 @@ void _mainMenuDisplay(void)
 	title[7] = "| |_| | |___ / ___ \\| |_| | | / ___ \\| || |_| |  _ <";
 	title[8] = " \\____|_____/_/   \\_\\____/___/_/   \\_\\_| \\___/|_| \\_\\";
 	std::cout << std::endl;
-	centerPrint(title[0], -3);
+	frm.centerPrint(title[0], -3);
 	std::cout << "\n";
-	centerPrint(title[1], -3);
+	frm.centerPrint(title[1], -3);
 	std::cout << "\n";
-	centerPrint(title[2], -2);
+	frm.centerPrint(title[2], -2);
 	std::cout << "\n";
-	centerPrint(title[3], -2);
+	frm.centerPrint(title[3], -2);
 	std::cout << "\n";
-	centerPrint(title[4], -1);
+	frm.centerPrint(title[4], -1);
 	std::cout << "\n";
 	for (int i = 5; i < 9; i++)
 	{
-		centerPrint(title[i]);
+		frm.centerPrint(title[i]);
 		std::cout << "\n";
 	}
 	std::cout << "\n\n";
-	centerPrint("START");
+	frm.centerPrint("START");
 	std::cout << "\n";
 	std::cout << "\n";
-	centerPrint("HIGH SCORE");
+	frm.centerPrint("HIGH SCORE");
 	std::cout << "\n";
 	std::cout << "\n";
-	centerPrint("QUIT");
+	frm.centerPrint("QUIT");
 	std::cout << "\n";
 	std::cout << "\n";
 	std::cout << std::endl;
@@ -160,8 +152,8 @@ void _mainMenuDisplay(void)
 
 mode battle(const std::string *hs_file_name)
 {
-	std::string battle_garbage_str;
 	int selection;
+	std::string garbage;
 
 	fighter *player = new fighter(5, 2, 3, 3, true);
 	player->addNewMove("ATTACK", "ATK", 1);
@@ -182,15 +174,10 @@ mode battle(const std::string *hs_file_name)
 		enemy->chooseMove();
 		_battleEnemyDisplay();
 		_battleMenu(player, enemy);
-		while (!(std::cin >> selection) || (selection < 1) || (selection > player->getMoveCount()))
-		{
-			std::cin.clear();
-			getline(std::cin, battle_garbage_str);
-			_battleEnemyDisplay();
-			_battleMenu(player,enemy, true);
-		}
-		getline(std::cin, battle_garbage_str);
+
+		selection = getIntInRange(1, player->getMoveCount(), "Choose a move: " ,"usage: <int> in range 1 to 3 (inclusive)");
 		player->chooseMove(selection - 1);
+
 		player->useMove(enemy);
 
 		if (enemy->getHP() > 0)
@@ -210,7 +197,7 @@ mode battle(const std::string *hs_file_name)
 			player->changeDEF(rand() % 2);
 			_battleVictoryDisplay();
 			_battleMenu(player, nullptr);
-			getline(std::cin, battle_garbage_str);
+			getline(std::cin, garbage);
 
 			enemy = new fighter((rand() % round) + 3, (rand() % round) + 1, (rand() % round + 1));
 			for (int i = 0; i < 3; i++)
@@ -236,8 +223,9 @@ mode battle(const std::string *hs_file_name)
 	return gameOver();
 }
 
-void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
+void _battleMenu(const fighter *player, const fighter *enemy)
 {
+	strformat frm;
 	std::string tmp;
 	std::string line[14];
 
@@ -247,7 +235,8 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 	{
 		menu[0] += ">";
 	}
-	std::cout << menu[0] << std::endl;
+	frm.print(menu[0]);
+	frm.print("\n");
 
 	if (enemy != nullptr)
 	{
@@ -256,7 +245,8 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 		{
 			menu[1] += "#";
 		}
-		std::cout << menu[1] << std::endl;  // left
+		frm.print(menu[1]);
+		frm.print("\n");
 
 		menu[2] = "BLOCK ";
 		for (int i = 0; ((i < enemy->getBlocking()) && (i < 48)); i++)
@@ -267,20 +257,23 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 		tmp += enemy->getMoveName();
 		tmp += " ";
 		tmp += std::to_string(enemy->getMoveStrength());
-		std::cout << menu[2];  // left
-		centerPrint(tmp, 999, menu[2].length());  // right
-		std::cout << "\n";
+		frm.clearStr();
+		frm.addStr(menu[2]);  // left side str
+		frm.addStr(frm.centerStr(tmp, 999));  // right side str
+		frm.printStr();
+		frm.print("\n");
 
 		menu[3] = "POISONED ";
 		for (int i = 0; ((i < enemy->getPoisoned()) && (i < 69)); i++)
 		{
 			menu[3] += "#";
 		}
-		std::cout << menu[3] << std::endl;  // left
+		frm.print(menu[3]);
+		frm.print("\n");
 	}
 	else
 	{
-		std::cout << "\n\n\n";
+		frm.print("\n\n\n");
 	}
 
 	menu[4] = "";
@@ -288,7 +281,8 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 	{
 		menu[4] += "<";
 	}
-	std::cout << menu[4] << std::endl;
+	frm.print(menu[4]);
+	frm.print("\n");
 
 	if (player != nullptr)
 	{
@@ -302,9 +296,11 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 			tmp += "#";
 		}
 		tmp += " HP";
-		std::cout << menu[5];  // left
-		centerPrint(tmp, 999, menu[5].length());  // right
-		std::cout << "\n";
+		frm.clearStr();
+		frm.addStr(menu[5]);  // left side str
+		frm.addStr(frm.centerStr(tmp, 999));  // right side str
+		frm.printStr();
+		frm.print("\n");
 
 		menu[6] = "";
 		for (int i = 0; ((i < player->getBlocking()) && (i < 72)); i++)
@@ -312,8 +308,8 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 			menu[6] += "#";
 		}
 		menu[6] += " BLOCK";
-		centerPrint(menu[6], 999);  // right
-		std::cout << "\n";
+		frm.centerPrint(menu[6], 999);  // right
+		frm.print("\n");
 
 		menu[7] = "2) ";
 		menu[7] += player->getMoveName(1);
@@ -325,42 +321,34 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 			tmp += "#";
 		}
 		tmp += " POISONED";
-		std::cout << menu[7];  // left
-		centerPrint(tmp, 999, menu[7].length());  // right
-		std::cout << "\n";
+		frm.clearStr();
+		frm.addStr(menu[7]);  // left side str
+		frm.addStr(frm.centerStr(tmp, 999));  // right side str
+		frm.printStr();
+		frm.print("\n");
 
 		menu[8] = "";
-		std::cout << menu[8] << std::endl;  // left
+		frm.print(menu[8]);
+		frm.print("\n");
 
 		menu[9] = "3) ";
 		menu[9] += player->getMoveName(2);
 		menu[9] += " ";
 		menu[9] += std::to_string(player->getMoveStrength(2));
-		std::cout << menu[9] << std::endl;  // left
+		frm.print(menu[9]);
+		frm.print("\n");
 
 		menu[10] = "";
-		std::cout << menu[10] << std::endl;  // left
-
-		if (print_usage == true)
-		{
-			menu[11] = "usage: <int> in range 1 to 3 (inclusive)";
-		}
-		else
-		{
-			menu[11] = "";
-		}
-		std::cout << menu[11] << std::endl;
-
-		menu[12] = "Choose a move: ";
-		std::cout << menu[12];
+		frm.print(menu[10]);
+		frm.print("\n");
 	}
 	else
 	{
-		std::cout << "\n\n\n";
-		centerPrint("Player is missing!!!");
-		std::cout << "\n\n";
-		centerPrint("If you are seeing this message");
-		centerPrint("Just ^C the program please");
+		frm.print("\n\n\n");
+		frm.centerPrint("Player is missing!!!");
+		frm.print("\n\n");
+		frm.centerPrint("If you are seeing this message");
+		frm.centerPrint("Just ^C the program please");
 	}
 
 	return;
@@ -368,6 +356,7 @@ void _battleMenu(const fighter *player, const fighter *enemy, bool print_usage)
 
 void _battleEnemyDisplay(void)
 {
+	strformat frm;
 	clearScreen();
 	std::string art[10];
 	art[0] = "                              ,.-----._";
@@ -380,52 +369,42 @@ void _battleEnemyDisplay(void)
 	art[7] = "  \\/    | |                 l     |   j";
 	art[8] = "          | |               _ \\_______/     _";
 	art[9] = "           | |             / `--|    |__.--' |";
-	centerPrint(art[0], -3);
+	frm.centerPrint(art[0], -3);
 	std::cout << "\n";
-	centerPrint(art[1], -2);
+	frm.centerPrint(art[1], -2);
 	std::cout << "\n";
 	for (int i = 2; i < 7; i++)
 	{
-		centerPrint(art[i]);
+		frm.centerPrint(art[i]);
 		std::cout << "\n";
 	}
-	centerPrint(art[7], -1);
+	frm.centerPrint(art[7], -1);
 	std::cout << "\n";
-	centerPrint(art[8]);
+	frm.centerPrint(art[8]);
 	std::cout << "\n";
-	centerPrint(art[9]);
+	frm.centerPrint(art[9]);
 	std::cout << "\n";
 	return;
 }
 void _battleVictoryDisplay(void)
 {
+	strformat frm;
 	clearScreen();
 	std::cout << "\n\n\n";
-	centerPrint("LEVEL");
+	frm.centerPrint("LEVEL");
 	std::cout << "\n";
-	centerPrint("UP!");
+	frm.centerPrint("UP!");
 	std::cout << "\n\n";
-	centerPrint("(Input Anything)");
+	frm.centerPrint("(Input Anything)");
 	std::cout << "\n\n\n\n";
 	return;
 }
 
 mode gameOver(void)
 {
-	int selection;
-	std::string garbage;
+	strformat frm;
 	_gameOverDisplay();
-	centerPrint("Selection: ");
-	while (!(std::cin >> selection) || (selection < 1) || (selection > 3))
-	{
-		std::cin.clear();
-		getline(std::cin, garbage);
-		_gameOverDisplay();
-		centerPrint("usage: int between 1 and 3 (inclusive)");
-		std::cout << "\n";
-		centerPrint("Selection: ");
-	}
-	getline(std::cin, garbage);
+	int selection =	getIntInRange(1, 3, frm.centerStr("Selection: "), frm.centerStr("usage: int between 1 and 3 (inclusive"));
 	switch (selection)
 	{
 		case 1:
@@ -445,20 +424,21 @@ mode gameOver(void)
 
 void _gameOverDisplay(void)
 {	
+	strformat frm;
 	clearScreen();
 	std::cout << "\n" << std::endl;
-	centerPrint("GAME");
+	frm.centerPrint("GAME");
 	std::cout << "\n";
-	centerPrint("OVER");
+	frm.centerPrint("OVER");
 	std::cout << "\n";
 	std::cout << "\n";
-	centerPrint("Play again?");
-	std::cout << "\n";
-	std::cout << std::endl;
-	centerPrint("High Scores");
+	frm.centerPrint("Play again?");
 	std::cout << "\n";
 	std::cout << std::endl;
-	centerPrint("Main Menu");
+	frm.centerPrint("High Scores");
+	std::cout << "\n";
+	std::cout << std::endl;
+	frm.centerPrint("Main Menu");
 	std::cout << "\n";
 	std::cout << std::endl;
 	std::cout << std::endl;
@@ -468,15 +448,18 @@ void _gameOverDisplay(void)
 
 mode highScore(const std::string *hs_file_name)
 {
+	strformat frm;
 	std::string garbage;
 	_highScoreDisplay(hs_file_name);
-	centerPrint("Enter anything to return home ");
+	frm.centerPrint("Enter anything to return home ");
+	std::cin >> garbage;
 	getline(std::cin, garbage);
 	return HOME;
 }
 
 void _highScoreDisplay(const std::string *hs_file_name)
 {
+	strformat frm;
 	clearScreen();
 	std::ifstream hs_in;
 	hs_in.open(*hs_file_name);
@@ -486,9 +469,9 @@ void _highScoreDisplay(const std::string *hs_file_name)
 	hs_list.clear();
 
 	std::cout << "\n\n\n";
-	centerPrint("HIGH");
+	frm.centerPrint("HIGH");
 	std::cout << "\n";
-	centerPrint("SCORES");
+	frm.centerPrint("SCORES");
 	std::cout << "\n\n";
 	if (hs_in.is_open())
 	{
@@ -527,54 +510,18 @@ void _highScoreDisplay(const std::string *hs_file_name)
 				tmp_str += "X";
 			}
 			tmp_str += ": ";
-			centerPrint(tmp_str, -1);
+			frm.centerPrint(tmp_str, -1);
 			std::cout << std::to_string(hs_list[i]);
 			std::cout << std::endl;
 		}
 	}
 	else
 	{
-		centerPrint("No Recorded High Scores");
+		frm.centerPrint("No Recorded High Scores");
 	}
 	std::cout << "\n\n" << std::endl;
 
 	return;
-}
-
-
-int centerPrint(const std::string str, const int offset, const int space_used)
-{
-	int count = 0;  // tracks amount of space on line used by function
-	int avail_space =  DEF_TERM_COL - space_used;
-	if (str.length() >= avail_space)
-	{
-		for (int i = 0; i < DEF_TERM_COL; i++)
-		{
-			std::cout << str[i];
-			count++;
-		}
-	}
-	else
-	{
-		int middle = avail_space / 2;
-		int str_offset = ((str.length() - 2) / 2) * -1;
-		int total_offset = str_offset + offset + middle;
-		if (total_offset + str.length() > avail_space)
-		{
-			total_offset -= (total_offset + str.length() - avail_space);
-		}
-		for (int i = 0; i < total_offset; i++)
-		{
-			std::cout << " ";
-			count++;
-		}
-		for (int i = 0; i < str.length(); i++)
-		{
-			std::cout << str[i];
-			count++;
-		}
-	}
-	return count;
 }
 
 void clearScreen(void)
@@ -592,7 +539,7 @@ int getInt(const std::string prompt, const std::string usage)
 {
 	std::string garbage;
 	int input;
-	std::cout << prompt;
+	std::cout << "\n" << prompt;  // \n because this function erases entire line after use
 	while (!(std::cin >> input))
 	{
 		std::cin.clear();
@@ -636,12 +583,12 @@ int getIntInRange(int start, int end, const std::string prompt, const std::strin
 		good_usage += " (inclusive)";
 	}
 
-	int input;
-	do
+	int input = getInt(good_prompt, good_usage);
+	while ((input < start) || (input > end))
 	{
+		std::cout << "\033[1E" << good_usage << "\033[2F";
 		input = getInt(good_prompt, good_usage);
 	}
-	while ((input < start) || (input > end));
 
 	return input;
 }
